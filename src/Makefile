@@ -5,11 +5,14 @@
 # Executable's name
 NAME	=	angstrom
 # Source files
-SRC	=	main.c \
-		main_thread.c \
-		writer_thread.c \
-		comm_thread.c \
-		database.c
+SRC	=	main.c		\
+		main_thread.c	\
+		writer_thread.c	\
+		comm_thread.c	\
+		database.c	\
+		command_put.c	\
+		command_del.c	\
+		command_get.c
 
 # ###################################################################
 
@@ -27,7 +30,7 @@ OBJS	= $(SRC:.c=.o)
 
 # Objects compilation options
 CFLAGS	= -ansi -std=c99 -pedantic-errors -Wall -Wextra -Wmissing-prototypes \
-	  -Wno-long-long -Wno-unused-parameter -D_GNU_SOURCE -D_THREAD_SAFE \
+	  -Wno-long-long -Wno-unused-parameter -Wno-unused-result -D_GNU_SOURCE -D_THREAD_SAFE \
 	  $(IPATH) $(EXEOPT)
 
 # Link options

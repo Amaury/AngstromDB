@@ -6,24 +6,43 @@
  */
 #include "angstrom.h"
 
+/* Communication threads' execution loop. */
 void *comm_thread_loop(void *param) {
 	comm_thread_t *thread = param;
-	int incoming_socket;
+	int in_sock;
 
 	// opening a connection to the writer thread
-	if ((thread->writer_sock = nn_socket(AF_SP, NN_PUSH)) < 0 ||
-	    nn_connect(thread->writer_sock, ENDPOINT_WRITER_SOCKET) < 0) {
-		fprintf(stderr, "[comm] Unable to connect to writer's socket.\n");
-		pthread_exit(NULL);
-	}
+	thread->writer_sock = nn_socket(AF_SP, NN_PUSH);
+	nn_connect(thread->writer_sock, ENDPOINT_WRITER_SOCKET);
 	// opening a connection to the main thread
-	if ((incoming_socket = nn_socket(AF_SP, NN_PULL)) < 0 ||
-	    nn_connect(incoming_socket, ENDPOINT_THREADS_SOCKET) < 0) {
-		fprintf(stderr, "Unable to connect to main thread's socket.\n");
-		pthread_exit(NULL);
-	}
+	in_sock = nn_socket(AF_SP, NN_PULL);
+	nn_connect(in_sock, ENDPOINT_THREADS_SOCKET);
 	// loop to process new connections
 	for (; ; ) {
+		// waiting for a new connection to handle
+		nn_recv(in_sock, &thread->client_sock, sizeof(int), 0);
+		// loop on incoming requests
+		for (; ; ) {
+			unsigned char cmd;
+
+			// read command byte
+			if (read(thread->client_sock, &cmd, sizeof(cmd)) <= 0) {
+				close(thread->client_sock);
+				break;
+			}
+			// interpret command
+			switch (cmd) {
+			case PROTO_PUT:
+				command_put(thread);
+				break;
+			case PROTO_DEL:
+				command_del(thread);
+				break;
+			case PROTO_GET:
+				command_get(thread);
+				break;
+			}
+		}
 	}
 	return (NULL);
 }

@@ -9,6 +9,7 @@
 #ifndef __ANGSTROM_H__
 #define __ANGSTROM_H__
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -36,6 +37,18 @@
 #define ENDPOINT_THREADS_SOCKET	"inproc://threads_socket"
 /** @const ENDPOINT_WRITER_SOCKET Writer thread's connection endpoint. */
 #define ENDPOINT_WRITER_SOCKET	"inproc://writer_socket"
+
+/* ********** PROTOCOL ************ */
+/** @const PROTO_PUT PUT command. */
+#define PROTO_PUT	1
+/** @const PROTO_DEL DEL command. */
+#define PROTO_DEL	2
+/** @const PROTO_GET GET command. */
+#define PROTO_GET	3
+/** @const PROTO_OK OK response. */
+#define PROTO_OK	1
+/** @const PROTO_ERR Error response. */
+#define PROTO_ERR	0
 
 /* ********** STRUCTURES ************ */
 /**
@@ -85,17 +98,13 @@ typedef enum writer_action_e {
  * @typedef	writer_msg_t
  *		Structure used to transfer data to the writer thread.
  * @field	type		Type of action (WRITE_PUT, WRITE_DEL).
- * @field	key_size	Length of the key.
- * @field	key_data	The key.
- * @field	value_size	Length of the data.
- * @field	value_data	The value.
+ * @field	key		Size and content of the key.
+ * @field	value		Size and content of the value.
  */
 typedef struct writer_msg_s {
 	writer_action_t type;
-	uint16_t key_size;
-	void *key_data;
-	uint32_t value_size;
-	void *value_data;
+	MDB_val key;
+	MDB_val value;
 } writer_msg_t;
 
 /* ************** FUNCTIONS *********** */
@@ -125,6 +134,26 @@ void *writer_loop(void *param);
  */
 void *comm_thread_loop(void *param);
 
+/* --- commands --- */
+/**
+ * @function	command_put
+ *		PUT command execution.
+ * @param	thread	Pointer to the current thread structure.
+ */
+void command_put(comm_thread_t *thread);
+/**
+ * @function	command_del
+ *		DEL command execution.
+ * @param	thread	Pointer to the current thread structure.
+ */
+void command_del(comm_thread_t *thread);
+/**
+ * @function	command_get
+ *		GET command execution.
+ * @param	thread	Pointer to the current thread structure.
+ */
+void command_get(comm_thread_t *thread);
+
 /* --- database access --- */
 /**
  * @function	database_open
@@ -143,23 +172,25 @@ void database_close(MDB_env *env);
 /**
  * @function	database_put
  *		Add or update a key in database.
- * @param	db		Pointer to the database environment.
- * @param	key_size	Size of the key.
- * @param	key_data	Key content.
- * @param	value_size	Size of the value.
- * @param	value_data	Value data.
- * @return	1 if OK, 0 otherwise.
+ * @param	db	Pointer to the database environment.
+ * @param	key	Size and content of the key.
+ * @param	value	Size and content of the value.
  */
-uint8_t database_put(MDB_env *db, uint16_t key_size, void *key_data,
-                     uint32_t value_size, void *value_data);
+void database_put(MDB_env *db, MDB_val *key, MDB_val *value);
 /**
  * @function	database_del
  *		Remove a key from database.
- * @param	db		Pointer to the database environment.
- * @param	key_size	Size of the key.
- * @param	key_data	Key content.
- * @return	1 if OK, 0 otherwise.
+ * @param	db	Pointer to the database environment.
+ * @param	key	Size and content of the key.
  */
-uint8_t database_del(MDB_env *db, uint16_t key_size, void *key_data);
+void database_del(MDB_env *db, MDB_val *key);
+/**
+ * @function	database_get
+ *		Return a value from database.
+ * @param	db	Pointer to the database environment.
+ * @param	key	Size and content of the key.
+ * @param	value	Pointer to the struct that will contain the value.
+ */
+void database_get(MDB_env *db, MDB_val *key, MDB_val *value);
 
 #endif /* __ANGSTROM_H__ */
