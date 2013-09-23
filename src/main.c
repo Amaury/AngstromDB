@@ -6,8 +6,10 @@
  */
 #include "angstrom.h"
 
-/* Private prototype. */
+/* *** Prototypes of private functions. *** */
+static void _daemonize(void);
 static int _create_listening_socket(unsigned short port);
+static void _main_thread_loop(angstrom_t *angstrom);
 
 /**
  * Main function of the program.
@@ -17,6 +19,8 @@ int main(int argc, char *argv[]) {
 	char *path = DEFAULT_DB_PATH;
 	int i;
 
+	// daemonization
+	_daemonize();
 	// server init
 	angstrom = calloc(1, sizeof(angstrom_t));
 	angstrom->socket = angstrom->threads_socket = -1;
@@ -29,24 +33,49 @@ int main(int argc, char *argv[]) {
 	angstrom->threads_socket = nn_socket(AF_SP, NN_PUSH);
 	nn_bind(angstrom->threads_socket, ENDPOINT_THREADS_SOCKET);
 	// create the writer thread
-	pthread_create(&angstrom->writer_tid, NULL, writer_loop, angstrom);
-	// create connection threads
+	pthread_create(&angstrom->writer_tid, NULL, thread_writer_loop, angstrom);
+	// create communication threads
 	for (i = 0; i < NBR_THREADS; i++) {
 		comm_thread_t *thread = &(angstrom->comm_threads[i]);
 
 		thread->client_sock = -1;
 		thread->angstrom = angstrom;
-		pthread_create(&thread->tid, 0, comm_thread_loop, thread);
+		pthread_create(&thread->tid, 0, thread_comm_loop, thread);
 		pthread_detach(thread->tid);
 	}
 	// create listening socket
 	angstrom->socket = _create_listening_socket(DEFAULT_PORT);
 	// server loop
-	main_thread_loop(angstrom);
+	_main_thread_loop(angstrom);
 	return (0);
 }
 
 /* ************** PRIVATE FUNCTIONS **************** */
+/**
+ * @function	_main_thread_loop
+ *		Main thread's execution loop. Wait for new incoming connections
+ *		and send them to the communication threads.
+ * @param	angstrom	Pointer to the server's structure.
+ */
+static void _main_thread_loop(angstrom_t *angstrom) {
+	int fd;
+	struct sockaddr_in addr;
+	unsigned int addr_size;
+	const int on = 1;
+
+	addr_size = sizeof(addr);
+	for (; ; ) {
+		bzero(&addr, addr_size);
+		// accept a new connection
+		if ((fd = accept(angstrom->socket, (struct sockaddr*)&addr,
+				 &addr_size)) < 0)
+			continue ;
+		setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (void*)&on, sizeof(on));
+		// send the file descriptor number to communication threads
+		nn_send(angstrom->threads_socket, &fd, sizeof(fd), 0);
+	}
+}
+
 /**
  * @function	_create_listening_socket
  *		Create a socket that will listening for incoming connections.
@@ -73,4 +102,21 @@ static int _create_listening_socket(unsigned short port) {
 	bind(sock, (struct sockaddr*)&addr, addr_size);
 	listen(sock, SOMAXCONN);
 	return (sock);
+}
+
+/**
+ * @function	_daemonize
+ *		Detach the process from the tty, put it ahead of its own
+ *		process group and close all its file descriptors.
+ */
+static void _daemonize() {
+	int fd;
+
+	// detach process
+	if (fork() != 0)
+		exit(0);
+	setsid();
+	// close all file descriptors
+	for (fd = 0; fd < FOPEN_MAX; ++fd)
+		close(fd);
 }

@@ -7,7 +7,7 @@
 #include "angstrom.h"
 
 /* Communication threads' execution loop. */
-void *comm_thread_loop(void *param) {
+void *thread_comm_loop(void *param) {
 	comm_thread_t *thread = param;
 	int in_sock;
 

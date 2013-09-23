@@ -84,17 +84,6 @@ typedef struct comm_thread_s {
 } comm_thread_t;
 
 /**
- * typedef	writer_action_t
- *		Type of writer's action.
- * @const	WRITE_PUT	Add or update a key in database.
- * @const	WRITE_DEL	Remove a key from database.
- */
-typedef enum writer_action_e {
-	WRITE_PUT = 0,
-	WRITE_DEL
-} writer_action_t;
-
-/**
  * @typedef	writer_msg_t
  *		Structure used to transfer data to the writer thread.
  * @field	type		Type of action (WRITE_PUT, WRITE_DEL).
@@ -102,37 +91,32 @@ typedef enum writer_action_e {
  * @field	value		Size and content of the value.
  */
 typedef struct writer_msg_s {
-	writer_action_t type;
+	enum {
+		WRITE_PUT,
+		WRITE_DEL
+	} type;
 	MDB_val key;
 	MDB_val value;
 } writer_msg_t;
 
 /* ************** FUNCTIONS *********** */
-/* --- main thread --- */
-/**
- * @function	main_thread_loop
- *		Main thread's execution loop.
- * @param	angstrom	Pointer to the server's structure.
- */
-void main_thread_loop(angstrom_t *angstrom);
-
 /* --- writer thread --- */
 /**
- * @function	writer_loop
+ * @function	thread_writer_loop
  *		Writer thread's execution loop.
  * @param	param	Pointer to the server's structure.
  * @return	Always NULL.
  */
-void *writer_loop(void *param);
+void *thread_writer_loop(void *param);
 
 /* --- communication threads --- */
 /**
- * @function	comm_thread_loop
+ * @function	thread_comm_loop
  *		Communication threads' execution loop.
  * @param	param	Pointer to the thread's structure.
  * @return	Always NULL.
  */
-void *comm_thread_loop(void *param);
+void *thread_comm_loop(void *param);
 
 /* --- commands --- */
 /**
@@ -164,9 +148,9 @@ void command_get(comm_thread_t *thread);
  * @return	A pointer to the allocated environment, or NULL.
  */
 MDB_env *database_open(const char *path, size_t mapsize, unsigned int nbr_threads);
-/**                                                           
+/**
  * Close a database and free its structure.
- * @param	env	A pointer to the database environment.                      
+ * @param	env	A pointer to the database environment.
  */
 void database_close(MDB_env *env);
 /**

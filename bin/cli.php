@@ -40,18 +40,16 @@ function command_get($sock, $input) {
 	}
 	$key = substr($input, 1, $pos);
 	// send the command
-	$buffer = chr(2) . chr(mb_strlen($key, 'ascii')) . $key;
+	$buffer = chr(3) . chr(mb_strlen($key, 'ascii')) . $key;
 	fwrite($sock, $buffer);
 	$response = fread($sock, 1);
 	if (ord($response) != 1) {
 		print("\tERROR\n");
 		return;
 	}
-print("reponse ok\n");
 	$response = fread($sock, 4);
 	$length = unpack('Nint', $response);
 	$length = $length['int'];
-print("length : '$length'\n");
 	$value = null;
 	if ($length > 0) {
 		$value = fread($sock, $length);

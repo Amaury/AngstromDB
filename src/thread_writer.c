@@ -7,7 +7,7 @@
 #include "angstrom.h"
 
 // Writer thread's execution loop.
-void *writer_loop(void *param) {
+void *thread_writer_loop(void *param) {
 	angstrom_t *angstrom = param;
 	int socket;
 

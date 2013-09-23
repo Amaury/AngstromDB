@@ -5,13 +5,12 @@
 # Executable's name
 NAME	=	angstrom
 # Source files
-SRC	=	main.c		\
-		main_thread.c	\
-		writer_thread.c	\
-		comm_thread.c	\
-		database.c	\
-		command_put.c	\
-		command_del.c	\
+SRC	=	main.c			\
+		thread_writer.c		\
+		thread_communication.c	\
+		database.c		\
+		command_put.c		\
+		command_del.c		\
 		command_get.c
 
 # ###################################################################
