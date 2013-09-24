@@ -65,4 +65,3 @@ function commandGet($sock, $key) {
 	return ($value);
 }
 
-
