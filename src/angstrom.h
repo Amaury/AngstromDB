@@ -22,7 +22,7 @@
 
 /* ********** DEFAULT CONFIGURATION VALUES ************ */
 /** @const NBR_THREADS Number of communication threads. */
-#define NBR_THREADS		10
+#define NBR_THREADS		20
 /** @const DEFAULT_DB_PATH Default path to the database. */
 #define DEFAULT_DB_PATH		"../var/database"
 /** @const DEFAULT_PORT Default port number. */
