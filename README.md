@@ -1,8 +1,12 @@
 ÅngströmDB
 ==========
 
-Very simple key-value noSQL database, based on LMDB and nanomsg. Created as code example during a talk.
+Very simple key-value noSQL database, based on [LMDB](http://symas.com/mdb/) and [nanomsg](http://nanomsg.org/).
 
-ÅngströmDB was created for educational usage only. Some parts are naively implemented.
+Created as code example during a talk. ÅngströmDB was designed for educational usage only.
+
+* No error management.
+* Some parts are naively implemented.
+* No replication mechanism.
 
 See [FineDB](http://www.finedb.org) for a real high-performance noSQL database.
