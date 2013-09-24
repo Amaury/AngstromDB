@@ -7,7 +7,6 @@
 #include "angstrom.h"
 
 /* *** Prototypes of private functions. *** */
-static void _daemonize(void);
 static int _create_listening_socket(unsigned short port);
 static void _main_thread_loop(angstrom_t *angstrom);
 
@@ -19,8 +18,6 @@ int main(int argc, char *argv[]) {
 	char *path = DEFAULT_DB_PATH;
 	int i;
 
-	// daemonization
-	_daemonize();
 	// server init
 	angstrom = calloc(1, sizeof(angstrom_t));
 	angstrom->socket = angstrom->threads_socket = -1;
@@ -102,21 +99,4 @@ static int _create_listening_socket(unsigned short port) {
 	bind(sock, (struct sockaddr*)&addr, addr_size);
 	listen(sock, SOMAXCONN);
 	return (sock);
-}
-
-/**
- * @function	_daemonize
- *		Detach the process from the tty, put it ahead of its own
- *		process group and close all its file descriptors.
- */
-static void _daemonize() {
-	int fd;
-
-	// detach process
-	if (fork() != 0)
-		exit(0);
-	setsid();
-	// close all file descriptors
-	for (fd = 0; fd < FOPEN_MAX; ++fd)
-		close(fd);
 }
