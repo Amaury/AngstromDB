@@ -29,11 +29,9 @@
 #define DEFAULT_PORT		11139
 /** @const DEFAULT_MAPSIZE Default map size (10 MB). */
 #define DEFAULT_MAPSIZE		10485760
-/** @const DEFAULT_TIMEOUT Default connection timeout (30 seconds). */
-#define DEFAULT_TIMEOUT		30
 
 /* ********** NANOMSG ENDPOINTS CONFIGURATION *********** */
-/** @const ENDPOINT_THREADS_SOCKET Threads' connection endpoint. */
+/** @const ENDPOINT_THREADS_SOCKET Communication threads' connection endpoint. */
 #define ENDPOINT_THREADS_SOCKET	"inproc://threads_socket"
 /** @const ENDPOINT_WRITER_SOCKET Writer thread's connection endpoint. */
 #define ENDPOINT_WRITER_SOCKET	"inproc://writer_socket"
@@ -41,8 +39,8 @@
 /* ********** PROTOCOL ************ */
 /** @const PROTO_PUT PUT command. */
 #define PROTO_PUT	1
-/** @const PROTO_DEL DEL command. */
-#define PROTO_DEL	2
+/** @const PROTO_DELETE DELETE command. */
+#define PROTO_DELETE	2
 /** @const PROTO_GET GET command. */
 #define PROTO_GET	3
 /** @const PROTO_OK OK response. */
@@ -126,11 +124,11 @@ void *thread_comm_loop(void *param);
  */
 void command_put(comm_thread_t *thread);
 /**
- * @function	command_del
- *		DEL command execution.
+ * @function	command_delete
+ *		DELETE command execution.
  * @param	thread	Pointer to the current thread structure.
  */
-void command_del(comm_thread_t *thread);
+void command_delete(comm_thread_t *thread);
 /**
  * @function	command_get
  *		GET command execution.

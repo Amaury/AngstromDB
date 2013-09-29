@@ -10,7 +10,7 @@ SRC	=	main.c			\
 		thread_communication.c	\
 		database.c		\
 		command_put.c		\
-		command_del.c		\
+		command_delete.c	\
 		command_get.c
 
 # ###################################################################

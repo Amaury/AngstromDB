@@ -1,13 +1,13 @@
 /**
- * DEL command execution.
+ * DELETE command execution.
  *
  * @author	Amaury Bouchard <amaury@amaury.net>
  * @copyright	© 2013, Amaury Bouchard
  */
 #include "angstrom.h"
 
-/* DEL command execution. */
-void command_del(comm_thread_t *thread) {
+/* DELETE command execution. */
+void command_delete(comm_thread_t *thread) {
 	uint8_t key_size, response = PROTO_OK;
 	void *key;
 	writer_msg_t *msg;

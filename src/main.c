@@ -13,9 +13,8 @@ static void _main_thread_loop(angstrom_t *angstrom);
 /**
  * Main function of the program.
  */
-int main(int argc, char *argv[]) {
+int main() {
 	angstrom_t *angstrom;
-	char *path = DEFAULT_DB_PATH;
 	int i;
 
 	// server init
@@ -23,9 +22,7 @@ int main(int argc, char *argv[]) {
 	angstrom->socket = angstrom->threads_socket = -1;
 	angstrom->comm_threads = calloc(NBR_THREADS, sizeof(comm_thread_t));
 	// open the database
-	if (argc > 1)
-		path = argv[1];
-	angstrom->db = database_open(path, DEFAULT_MAPSIZE, NBR_THREADS);
+	angstrom->db = database_open(DEFAULT_DB_PATH, DEFAULT_MAPSIZE, NBR_THREADS);
 	// create the nanomsg socket for threads communication
 	angstrom->threads_socket = nn_socket(AF_SP, NN_PUSH);
 	nn_bind(angstrom->threads_socket, ENDPOINT_THREADS_SOCKET);
